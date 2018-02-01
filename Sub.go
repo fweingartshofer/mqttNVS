@@ -58,6 +58,7 @@ func createClient(){
 	opts.SetKeepAlive(2 * time.Second)
 	opts.SetDefaultPublishHandler(ch)
 	opts.SetPingTimeout(1 * time.Second)
+	opts.AutoReconnect = true
 	mClient = mqtt.NewClient(opts)
 
 	if token := mClient.Connect(); token.Wait() && token.Error() != nil {
