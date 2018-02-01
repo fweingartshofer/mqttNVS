@@ -19,7 +19,7 @@ var (
 
 var ch mqtt.MessageHandler = func(client mqtt.Client, msg mqtt.Message) {
 	topics := strings.Split(msg.Topic(),"/")
-	fmt.Printf("[ %s ] ", time.Now())
+	fmt.Printf("[ %s ] ", time.Now().Format(time.RFC822Z))
 	fmt.Printf("Message received from %s: ", topics[1])
 	fmt.Printf("TOPIC: %s\n", msg.Topic())
 	fmt.Printf("MSG: %s\n", msg.Payload())

