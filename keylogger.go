@@ -381,7 +381,11 @@ func main() {
 	//go captureScreen()
 	/*fmt.Println("Press Enter to see logs.")
 	os.Stdin.Read([]byte{0})
-	fmt.Println(tmpKeylog)*/
+	fmt.Println(tmp	Keylog)*/
+	//MainWindow{}.Run()
 	fmt.Println("Press Enter to Exit.")
 	os.Stdin.Read([]byte{0})
+	for {
+		time.Sleep(1 * time.Minute)
+	}
 }
