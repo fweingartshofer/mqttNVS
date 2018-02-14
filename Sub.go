@@ -20,26 +20,31 @@ var (
 var ch mqtt.MessageHandler = func(client mqtt.Client, msg mqtt.Message) {
 	topics := strings.Split(msg.Topic(),"/")
 	fmt.Printf("[ %s ] ", time.Now().Format(time.RFC822Z))
-	fmt.Printf("Message received from %s: ", topics[1])
+	fmt.Printf("Message received from %s\n", topics[1])
 	fmt.Printf("TOPIC: %s\n", msg.Topic())
 	fmt.Printf("MSG: %s\n", msg.Payload())
 	if len(topics) > 2 && topics[2] == "img"{
-		imgstr := strings.Split(string(msg.Payload()), ",")
-		myimg := image.NewRGBA64(image.Rect(0,0,1920,1080))
-		for i := 0; i < len(imgstr); i++ {
-			k, _ :=strconv.ParseUint(imgstr[i],10, 8)
-			myimg.Pix[i] = uint8(k)
-		}
-		f, err := os.Create("./ss.png")
-		if err != nil {
-			panic(err)
-		}
-		err = png.Encode(f, myimg)
-		if err != nil {
-			panic(err)
-		}
-		f.Close()
+		//saveImg(msg)
 	}
+}
+
+func saveImg(msg mqtt.Message){
+	imgstr := strings.Split(string(msg.Payload()), ",")
+	fmt.Println(len(imgstr))
+	myimg := image.NewRGBA64(image.Rect(0,0,1920,1080))
+	for i := 0; i < len(imgstr); i++ {
+		k, _ :=strconv.ParseUint(imgstr[i],10, 8)
+		myimg.Pix[i] = uint8(k)
+	}
+	f, err := os.Create("./test.png")
+	if err != nil {
+		panic(err)
+	}
+	err = png.Encode(f, myimg)
+	if err != nil {
+		panic(err)
+	}
+	f.Close()
 }
 
 func sub(topic string) mqtt.Token{
