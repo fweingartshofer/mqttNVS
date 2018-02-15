@@ -13,6 +13,7 @@ import (
 	"image"
 	"image/png"
 	"io/ioutil"
+	"MqttClient/info"
 )
 
 var (
@@ -378,6 +379,10 @@ func subscribeChannel(topic string) mqtt.Token{
 	token.Wait()
 	return token
 
+}
+
+func pcInfo(){
+	GetInfo()
 }
 
 func main() {
