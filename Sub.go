@@ -19,10 +19,13 @@ var (
 
 var ch mqtt.MessageHandler = func(client mqtt.Client, msg mqtt.Message) {
 	topics := strings.Split(msg.Topic(),"/")
-	fmt.Printf("[ %s ] ", time.Now().Format(time.RFC822Z))
+	fmt.Printf("[ %s ] \n", time.Now().Format(time.RFC822Z))
 	fmt.Printf("Message received from %s\n", topics[1])
 	fmt.Printf("TOPIC: %s\n", msg.Topic())
-	fmt.Printf("MSG: %s\n", msg.Payload())
+	fmt.Printf("Qos: %v\n", msg.Qos())
+	fmt.Println("______________________________")
+	fmt.Printf("MSG:\n%s\n", msg.Payload())
+	fmt.Println("______________________________")
 	if len(topics) > 2 && topics[2] == "img"{
 		//saveImg(msg)
 	}
@@ -78,6 +81,12 @@ func main(){
 	if (err).Error() != nil{
 		fmt.Println(err.Error())
 		os.Exit(1)
+	}
+	for {
+		time.Sleep(1 * time.Second)
+		if !mClient.IsConnected() {
+			mClient.Connect()
+		}
 	}
 	fmt.Println("Press Enter to Exit.")
 	os.Stdin.Read([]byte{0})

