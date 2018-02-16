@@ -1,42 +1,42 @@
 package main
 
 import (
-	"github.com/eclipse/paho.mqtt.golang"
 	"fmt"
-	"time"
-	"strings"
+	"github.com/eclipse/paho.mqtt.golang"
 	"image"
-	"strconv"
-	"os"
 	"image/png"
 	"log"
+	"os"
+	"strconv"
+	"strings"
+	"time"
 )
 
 var (
 	subscribe string
-	mClient mqtt.Client
+	mClient   mqtt.Client
 )
 
 var ch mqtt.MessageHandler = func(client mqtt.Client, msg mqtt.Message) {
-	topics := strings.Split(msg.Topic(),"/")
+	topics := strings.Split(msg.Topic(), "/")
 	fmt.Printf("[ %s ] \n", time.Now().Format(time.RFC822Z))
 	fmt.Printf("Message received from %s\n", topics[1])
 	fmt.Printf("TOPIC: %s\n", msg.Topic())
 	fmt.Printf("Qos: %v\n", msg.Qos())
 	fmt.Println("______________________________")
 	fmt.Printf("MSG:\n%s\n", msg.Payload())
-	fmt.Println("______________________________")
-	if len(topics) > 2 && topics[2] == "img"{
+	fmt.Println("==============================")
+	if len(topics) > 2 && topics[2] == "img" {
 		//saveImg(msg)
 	}
 }
 
-func saveImg(msg mqtt.Message){
+func saveImg(msg mqtt.Message) {
 	imgstr := strings.Split(string(msg.Payload()), ",")
 	fmt.Println(len(imgstr))
-	myimg := image.NewRGBA64(image.Rect(0,0,1920,1080))
+	myimg := image.NewRGBA64(image.Rect(0, 0, 1920, 1080))
 	for i := 0; i < len(imgstr); i++ {
-		k, _ :=strconv.ParseUint(imgstr[i],10, 8)
+		k, _ := strconv.ParseUint(imgstr[i], 10, 8)
 		myimg.Pix[i] = uint8(k)
 	}
 	f, err := os.Create("./test.png")
@@ -50,14 +50,14 @@ func saveImg(msg mqtt.Message){
 	f.Close()
 }
 
-func sub(topic string) mqtt.Token{
+func sub(topic string) mqtt.Token {
 	token := mClient.Subscribe(topic, 0, nil)
 	token.Wait()
 	return token
 
 }
 
-func createClient(){
+func createClient() {
 	mqtt.ERROR = log.New(os.Stdout, "", 0)
 
 	hostame, _ := os.Hostname()
@@ -74,11 +74,11 @@ func createClient(){
 	}
 }
 
-func main(){
+func main() {
 	subscribe = "client/#"
 	createClient()
 	err := sub(subscribe)
-	if (err).Error() != nil{
+	if (err).Error() != nil {
 		fmt.Println(err.Error())
 		os.Exit(1)
 	}
@@ -90,4 +90,5 @@ func main(){
 	}
 	fmt.Println("Press Enter to Exit.")
 	os.Stdin.Read([]byte{0})
+	mClient.Disconnect(10)
 }

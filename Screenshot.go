@@ -1,23 +1,18 @@
 package main
 
 import (
-	"image"
-	"os"
-	"image/png"
 	"github.com/vova616/screenshot"
-	"os/exec"
-	"strings"
-	"bytes"
-	"runtime"
-	"fmt"
+	"image"
+	"image/png"
+	"os"
 )
 
-func main(){
+func main() {
 	captureScreen()
 }
 
-func captureDisplay(){
-	img, err := screenshot.CaptureRect(image.Rect(0,0,1920, 1080))
+func captureDisplay() {
+	img, err := screenshot.CaptureRect(image.Rect(0, 0, 1920, 1080))
 	if err != nil {
 		panic(err)
 	}
@@ -31,4 +26,3 @@ func captureDisplay(){
 	}
 	f.Close()
 }
-
