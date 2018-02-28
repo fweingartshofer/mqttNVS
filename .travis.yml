@@ -1,3 +1,9 @@
-  language: go
-  go:
-    - "1.10"
+
+
+{
+  "language": "go",
+  "go": "1.10",
+  "os": "windows",
+  "group": "stable",
+}
+
