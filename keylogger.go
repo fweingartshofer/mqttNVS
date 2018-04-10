@@ -1,7 +1,6 @@
 package main
 
 import (
-	"./info"
 	"fmt"
 	"github.com/AllenDang/w32"
 	"github.com/eclipse/paho.mqtt.golang"
@@ -14,6 +13,7 @@ import (
 	"syscall"
 	"time"
 	"unsafe"
+	"github.com/flohero/mqttNVS/info"
 )
 
 var (
